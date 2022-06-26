@@ -11,8 +11,13 @@ import
   typeinfo,
   base64,
   math,
-  terminal,
-  zippy
+  terminal
+
+const tiledUseZippy {.booldefine.} = true
+
+when tiledUseZippy:
+  import zippy
+
 
 type
   TiledGid* = distinct uint32
@@ -550,9 +555,17 @@ proc loadTiledMap*(path: string): TiledMap =
 
       case compression
       of "gzip":
-        decoded = uncompress(decoded, dataFormat  = dfGzip)
+        when tiledUseZippy:
+          decoded = uncompress(decoded, dataFormat = dfGzip)
+        else: 
+          echo "Nim Tiled cannot decode gzip-compressed layer, use -d:tiledUseZippy to enable."
+          return
       of "zlib":
-        decoded = uncompress(decoded, dataFormat  = dfZlib)
+        when tiledUseZippy:
+          decoded = uncompress(decoded, dataFormat = dfZlib)
+        else: 
+          echo "Nim Tiled cannot decode zlib-compressed layer, use -d:tiledUseZippy to enable."
+          return
       else:
         discard
 
